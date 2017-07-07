@@ -54,16 +54,20 @@
   </Choose>
   <Import Project="$(FSharpTargetsPath)" />
   <ItemGroup>
-    <Compile Include="AssemblyInfo.fs" />
-    <Compile Include="App.fs" />
     <None Include="App.config" />
     <Content Include="packages.config" />
+    <Compile Include="Db.fs" />
+    <Compile Include="RestFul.fs" />
+    <Compile Include="App.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">
       <HintPath>..\packages\FSharp.Core.4.2.1\lib\net45\FSharp.Core.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="Suave">
       <HintPath>..\packages\Suave.2.1.1\lib\net40\Suave.dll</HintPath>
     </Reference>
