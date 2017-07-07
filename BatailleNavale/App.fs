@@ -11,6 +11,7 @@ let main argv =
     let userWebPart = rest "users" {
         GetAll = Db.getUsers
         Create = Db.createUser
+        Update = Db.updateUser
     }
 
     let defaultWebPart = OK "Hello World"
