@@ -10,6 +10,7 @@ open Suave.Successful
 let main argv =
     let userWebPart = rest "users" {
         GetAll = Db.getUsers
+        Create = Db.createUser
     }
 
     let defaultWebPart = OK "Hello World"
