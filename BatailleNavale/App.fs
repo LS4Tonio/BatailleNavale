@@ -7,7 +7,8 @@ open BatailleNavale.db
 open Suave.Successful
 
 [<EntryPoint>]
-let main argv =§users" {
+let main argv =
+    let userWebPart = rest "users" {
         GetAll = Db.getUsers
     }
 
