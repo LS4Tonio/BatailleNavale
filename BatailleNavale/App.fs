@@ -3,15 +3,19 @@
 open Suave                 // always open suave
 open Suave.Web                 // always open suave
 open BatailleNavale.Rest
-open BatailleNavale.db
+open BatailleNavale.db.users
 open Suave.Successful
 
 [<EntryPoint>]
 let main argv =
     let userWebPart = rest "users" {
-        GetAll = Db.getUsers
-        Create = Db.createUser
-        Update = Db.updateUser
+        GetAll = DbUsers.getUsers
+        Create = DbUsers.createUser
+        Update = DbUsers.updateUser
+        Delete = DbUsers.deleteUser
+        GetById = DbUsers.getUser
+        UpdateById = DbUsers.updateUserById
+        IsExists = DbUsers.isUserExists
     }
 
     let defaultWebPart = OK "Hello World"
