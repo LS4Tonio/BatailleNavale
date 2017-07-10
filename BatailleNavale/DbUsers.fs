@@ -12,7 +12,7 @@ module DbUsers =
 
     // Get all users
     let getUsers () =
-        userStorage.Values |> Seq.map (fun p -> p)
+        userStorage.Values |> Seq.map (fun u -> u)
 
     // Get user
     let getUser id =
