@@ -1,4 +1,4 @@
-﻿namespace BatailleNavale.db
+﻿namespace BatailleNavale.db.users
 
 open System.Collections.Generic
 
@@ -7,12 +7,18 @@ type User = {
     Username: string
 }
 
-module Db =
+module DbUsers =
     let private userStorage = new Dictionary<int, User>()
 
     // Get all users
     let getUsers () =
         userStorage.Values |> Seq.map (fun p -> p)
+
+    // Get user
+    let getUser id =
+        match userStorage.ContainsKey(id) with
+        | true -> Some userStorage.[id]
+        | false -> None
 
     // Create user
     let createUser user =
@@ -26,16 +32,24 @@ module Db =
 
     // Update user by id
     let updateUserById userId userToBeUpdated =
-        if userStorage.ContainsKey(userId) then
+        match userStorage.ContainsKey(userId) with
+        | true ->
             let updatedUser = {
                 Id = userId
                 Username = userToBeUpdated.Username
             }
             userStorage.[userId] <- updatedUser
             Some updatedUser
-        else
-            None
+        | false -> None
 
     // Update user
     let updateUser userToBeUpdated =
         updateUserById userToBeUpdated.Id userToBeUpdated
+
+    // Delete user
+    let deleteUser userId =
+        userStorage.Remove(userId) |> ignore
+
+    // User exists
+    let isUserExists =
+        userStorage.ContainsKey
