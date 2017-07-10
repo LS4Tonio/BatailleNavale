@@ -4,7 +4,9 @@ open Suave                      // always open suave
 open Suave.Web                  // always open suave
 open BatailleNavale.Rest
 open BatailleNavale.db.users
+open Rules
 open Suave.Successful
+
 
 [<EntryPoint>]
 let main argv =
@@ -20,5 +22,8 @@ let main argv =
 
     let defaultWebPart = OK "Hello World"
 
+    printsomething 1
+
     startWebServer defaultConfig (choose [userWebPart; defaultWebPart])
+    //main must end with int
     0
