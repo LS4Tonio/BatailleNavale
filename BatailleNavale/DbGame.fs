@@ -33,7 +33,7 @@ type Grid = {
 
 type Player = {
     User: User
-    Grid: Grid
+    //Grid: Grid
 }
 
 type PlayerOrNone =
@@ -42,7 +42,7 @@ type PlayerOrNone =
 
 type Game = {
     Id: int
-    Player1: Player
+    Player1: int
     Player2: PlayerOrNone
     State: GameState
     Current: int
@@ -60,30 +60,42 @@ module DbGames =
 
     // Get game
     let getById id =
-        match gameStorage.ContainsKey(id) with
-        | true -> Some gameStorage.[id]
-        | false -> None
+        //match id with
+        //| 0 ->
+        //    Some {
+        //        Id = id
+        //        Player1 = 0
+        //        Player2 = PlayerOrNone.Empty
+        //        State = GameState.WaitingForPlayer
+        //        Current = -1
+        //        Winner = -1
+        //    }
+        //| _ ->
+            match gameStorage.ContainsKey(id) with
+            | true -> Some gameStorage.[id]
+            | false -> None
 
     // Join game
     let joinGame gameId playerId =
         match gameStorage.ContainsKey(gameId) with
         | true ->
             let currentGame = gameStorage.[gameId]
-            let user = {
-                Grid = {
-                    LengthX = 10
-                    LengthY = 10
-                    Cells = new List<Cell>()
-                }
-                User = {
-                    Id = playerId
-                    Username = ""
-                }
-            }
+            //let user = {
+            //    Grid = {
+            //        LengthX = 10
+            //        LengthY = 10
+            //        Cells = new List<Cell>()
+            //    }
+            //    User = {
+            //        Id = playerId
+            //        Username = ""
+            //    }
+            //}
             Some {
                 Id = currentGame.Id
                 Player1 = currentGame.Player1
-                Player2 = PlayerOrNone.Player user
+                Player2 = currentGame.Player2
+                //Player2 = PlayerOrNone.Player user
                 State = GameState.Preparation
                 Current = currentGame.Current
                 Winner = currentGame.Winner
@@ -96,7 +108,8 @@ module DbGames =
         let newGame = {
             Id = id
             Player1 = game.Player1
-            Player2 = PlayerOrNone.Empty
+            Player2 = game.Player2
+            //Player2 = PlayerOrNone.Empty
             State = GameState.WaitingForPlayer
             Current = -1
             Winner = -1

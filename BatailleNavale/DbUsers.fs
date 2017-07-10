@@ -10,6 +10,8 @@ type User = {
 module DbUsers =
     let private userStorage = new Dictionary<int, User>()
 
+    let getUserstorage () = userStorage
+
     // Get all users
     let getUsers () =
         userStorage.Values |> Seq.map (fun u -> u)
