@@ -7,7 +7,6 @@ open BatailleNavale.db.users
 open Rules
 open Suave.Successful
 
-
 [<EntryPoint>]
 let main argv =
     let userWebPart = rest "users" {

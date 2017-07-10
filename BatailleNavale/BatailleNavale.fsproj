@@ -57,6 +57,8 @@
     <None Include="App.config" />
     <Content Include="packages.config" />
     <Compile Include="DbUsers.fs" />
+    <Compile Include="DbBoats.fs" />
+    <Compile Include="DbGame.fs" />
     <Compile Include="Rules.fs" />
     <Compile Include="RestFul.fs" />
     <Compile Include="App.fs" />
