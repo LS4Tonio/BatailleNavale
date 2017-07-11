@@ -1,5 +1,6 @@
 ﻿namespace BatailleNavale.db.boats
 
+//type Coordinate = Coordinate of int * int
 type Coordinate = {
     X: int
     Y: int
@@ -13,31 +14,31 @@ type Boat = {
 }
 
 module DbBoats =
-    let private carrier = {
+    let carrier = {
         Id = 1
         Name = "Carrier"
         Length = 5
         Coordiates = []
     }
-    let private battleship = {
+    let battleship = {
         Id = 2
         Name = "Battleship"
         Length = 4
         Coordiates = []
     }
-    let private cruiser = {
+    let cruiser = {
         Id = 3
         Name = "Cruiser"
         Length = 3
         Coordiates = []
     }
-    let private submarine = {
+    let submarine = {
         Id = 4
         Name = "Submarine"
         Length = 3
         Coordiates = []
     }
-    let private destroyer = {
+    let destroyer = {
         Id = 5
         Name = "Destroyer"
         Length = 2
