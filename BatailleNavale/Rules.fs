@@ -2,6 +2,19 @@
 //list7 & resultList2 is the proper example
 
 
+type Untruc = int
+
+type Deuxtruc =
+    | UnInt of Untruc
+    | Empty
+
+let returndeuxtruc p =
+    match p with
+    | a when a<10 -> Deuxtruc.UnInt p
+    | _ -> Deuxtruc.Empty
+
+
+
 let aggregateString s1 s2 = 
     match String.length s1, String.length s2 with
     | l1, l2 when l1>  l2 -> s1
@@ -43,5 +56,6 @@ let printsomething s1 =
         | _ -> a ) 
 
     printfn "The resultList2: %A" resultList2
-
+    
     printfn "%s" (["a";"ab";"abc";"abcd"] |> List.reduce aggregateString)
+

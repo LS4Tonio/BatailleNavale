@@ -23,6 +23,14 @@ let main argv =
 
     printsomething 1
 
+//    let myCfg =
+//        { 
+//            defaultConfig with
+//             bindings = [ HttpBinding.createSimple HTTP "10.8.110.223" 8080 ]
+//        }
+//    startWebServer myCfg (choose [userWebPart; defaultWebPart])
+
+
     startWebServer defaultConfig (choose [userWebPart; defaultWebPart])
     //main must end with int
     0
