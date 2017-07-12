@@ -1,6 +1,6 @@
 module View exposing (..)
 
-import Html exposing (Html, Attribute, div, input, text, button, h4, p)
+import Html exposing (..)
 import Html.Attributes as A
 import Html.Events exposing (onInput, onClick)
 import Draggable
@@ -9,25 +9,55 @@ import Update exposing (..)
 import Model exposing (..)
 import Material.Grid exposing (grid, cell, size, Device(..))
 
+
 view : Model -> Html Event
 view model =
   div []
     [ div [] [ text model.user.name ]
     , button [ onClick ShowTextBidon ] [ text "Please work !!" ]
-    , grid []
-    [ cell [ size All 4 ]
-        [ h4 [] [text "Cell 1"]
+    , table [ A.style [("border-collapse", "collapse")]]
+        [
+        tbody [] [
+        tr []
+            [ th [ ] [ ]
+                , th [ ] [ text "A" ]
+                , th [ ] [ text "B" ]
+                , th [ ] [ text "C" ]
+                , th [ ] [ text "D" ]
+                , th [ ] [ text "E" ]
+                , th [ ] [ text "F" ]
+                , th [ ] [ text "G" ]
+                , th [ ] [ text "H" ]
+                , th [ ] [ text "I" ]
+                , th [ ] [ text "J" ]
+            ]
+            , tr []
+            [ th [ ] [ text "1" ]
+                , th [ ] [ ]
+                , th [ ] [ ]
+                , th [ ] [ ]
+                , th [ ] [ ]
+                , th [ ] [ ]
+                , th [ ] [ ]
+                , th [ ] [ ]
+                , th [ ] [ ]
+                , th [ ] [ ]
+                , th [ ] [ ]
+            ]
         ]
-    , cell [ Material.Grid.offset All 2, size All 4 ]
-        [ h4 [] [text "Cell 2"]
-        , p [] [text "This cell is offset by 2"]
         ]
-    , cell [ size All 6 ]
-        [ h4 [] [text "Cell 3"]
-        ]
-    , cell [ size Tablet 6, size Desktop 12, size Phone 2 ]
-        [ h4 [] [text "Cell 4"]
-        , p [] [text "Size varies with device"]
-        ]
-       ]
     ]
+
+
+--toTableLine : List Cell -> Html msg
+--toTableLine ligne =
+--    List.concat [
+--        tr []
+--        [ th [ ] [ text "1" ]
+--        , List.map toTableRow ligne
+--        ]
+--    ]
+--
+--toTableRow: Cell -> Html msg
+--toTableRow cell =
+--    td [ A.style [("border", "1px solid black")]  ] [ ]

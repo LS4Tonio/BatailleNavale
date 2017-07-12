@@ -24,6 +24,7 @@ type alias Boat = {
     , isVertical : Bool
     , isSink : Bool
     , numberHit : Int
+    , coordinate : Coordinate
 }
 
 -- A cell of a grid
@@ -32,16 +33,11 @@ type alias Cell = {
     , state : States
 }
 
--- a grid's line
-type alias Line = {
-    cells : List
-}
-
 -- THE grid
 type alias Grid = {
     lengthX : Int
     , lengthY : Int
-    , lines : List
+    , lines : List (List Cell)
 }
 
 -- A user's definition

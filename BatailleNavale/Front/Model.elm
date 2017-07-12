@@ -5,6 +5,7 @@ import Declaration exposing (..)
 
 type alias Model = {
     user : User
+    , grid : Grid
 }
 
 -- type alias Model = {

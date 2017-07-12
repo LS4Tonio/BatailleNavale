@@ -11,7 +11,20 @@ import Json.Decode as Decode
 
 init : User -> (Model, Cmd Event)
 init user =
-  ( Model user
+  ( Model user (Grid 10 10
+    [ [ (Cell (Coordinate 0 0) None), (Cell (Coordinate 0 1) None)
+        ,(Cell (Coordinate 0 0) None), (Cell (Coordinate 0 1) None)
+        ,(Cell (Coordinate 0 0) None), (Cell (Coordinate 0 1) None)
+        ,(Cell (Coordinate 0 0) None), (Cell (Coordinate 0 1) None)
+        ,(Cell (Coordinate 0 0) None), (Cell (Coordinate 0 1) None)
+      ]
+      ,[ (Cell (Coordinate 0 0) None), (Cell (Coordinate 0 1) None)
+        ,(Cell (Coordinate 0 0) None), (Cell (Coordinate 0 1) None)
+        ,(Cell (Coordinate 0 0) None), (Cell (Coordinate 0 1) None)
+        ,(Cell (Coordinate 0 0) None), (Cell (Coordinate 0 1) None)
+        ,(Cell (Coordinate 0 0) None), (Cell (Coordinate 0 1) None)
+      ]
+    ])
   , getUsers user.id
   )
 
@@ -22,7 +35,7 @@ update event model =
       (model, getUsers model.user.id)
 
     NewText (Ok newUser) ->
-      (Model newUser, Cmd.none)
+      (Model newUser model.grid, Cmd.none)
 
     NewText (Err _) ->
       (model, Cmd.none)
