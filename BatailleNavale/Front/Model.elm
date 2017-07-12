@@ -1,7 +1,19 @@
 module Model exposing (..)
 
-type alias Model = Int
+import Http exposing (..)
+import Declaration exposing (..)
 
-model : Model
-model =
-  0
+type alias Model = {
+    user : User
+}
+
+-- type alias Model = {
+--     game : Game
+--     , boats : List
+--     , user : User
+-- }
+
+
+
+
+

@@ -1,20 +1,19 @@
-module View exposing (view)
+module View exposing (..)
 
 import Html exposing (Html, Attribute, div, input, text, button, h4, p)
 import Html.Attributes as A
 import Html.Events exposing (onInput, onClick)
 import Draggable
-import Model exposing (Model)
-import Msg exposing (Msg)
+import Declaration exposing (..)
+import Update exposing (..)
+import Model exposing (..)
 import Material.Grid exposing (grid, cell, size, Device(..))
 
-view : Model -> Html Msg
+view : Model -> Html Event
 view model =
   div []
-    [ button [ onClick Msg.Decrement ] [ text "-" ]
-    , div [] [ text (toString model) ]
-    , button [ onClick Msg.Increment ] [ text "+" ]
-    , button [ onClick Msg.Reset ] [ text "0" ]
+    [ div [] [ text model.user.name ]
+    , button [ onClick ShowTextBidon ] [ text "Please work !!" ]
     , grid []
     [ cell [ size All 4 ]
         [ h4 [] [text "Cell 1"]
