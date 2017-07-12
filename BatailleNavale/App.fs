@@ -1,7 +1,7 @@
 ﻿module App
 
 open Suave
-open Suave.Web       
+open Suave.Web
 open Suave.RequestErrors
 open Suave.Filters
 open Suave.Operators
@@ -9,6 +9,7 @@ open System.IO
 open BatailleNavale.Rest
 open BatailleNavale.db.users
 open BatailleNavale.db.games
+open BatailleNavale.db.boats
 
 [<EntryPoint>]
 let main argv =
@@ -39,15 +40,15 @@ let main argv =
         UpdateById = DbGames.updateGameById
         IsExists = DbGames.isGameExists
     }
-//    let boatWebPart = rest "placeboat" {
-//        GetAll = Rules.getAll//not done
-//        Create = Rules.placeBoat
-//        Update = Rules.getAll//not done
-//        Delete = Rules.getAll//not done
-//        GetById = DbGames.getById//not done
-//        UpdateById = DbGames.updateGameById//not done
-//        IsExists = DbGames.isGameExists//not done
-//    }
+    let boatWebPart = rest "placeboat" {
+        GetAll = DbBoats.getBoats
+        Create = DbBoats.placeBoat
+        Update = Rules.getAll
+        Delete = Rules.getAll
+        GetById = DbBoats.getBoat
+        UpdateById = DbGames.updateGameById
+        IsExists = DbGames.isGameExists
+    }
 
     startWebServer config (choose [userWebPart; gameWebPart; indexWebPart])
 
