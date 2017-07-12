@@ -10,6 +10,8 @@ type SimpleBoat = {
      TopLeftCoordinate: BatailleNavale.db.boats.Coordinate
      IsVertical: bool
 }
+
+
 type MayHaveBoat = 
     | Boat of SimpleBoat
     | Empty
@@ -18,23 +20,30 @@ type GridElement = {
      Boat: MayHaveBoat
      Hit : bool
 }
-type BoatResponse = 
-    | Boat of SimpleBoat
+type BoatResponseError = //moved to errors
     | OutOfGrid
     | AllreadyTaken
     | BoatTypeAlreadyPlaced
     | UnknownBoat
     | BoatHasNotAlreadyBeenPlaced //for update
 
+//type OptionLike<'a> =       // use a generic definition
+//   | Some of 'a           // valid value
+//   | Error of BoatResponseError                 // missing
+
+type BoatResponse = 
+    | Boat of SimpleBoat
+    | Error of BoatResponseError
+
 let private Boats = new List<SimpleBoat>()
-let mutable BoatGrid = List<List<GridElement>>()
+let private BoatGrid = List<List<GridElement>>()
 
 let checkBoatType boatResponse = 
     match boatResponse with
         | Boat aSimpleBoat  ->
                 let result = List.contains(aSimpleBoat.Name ) defaultBoats
                 match result with
-                    | false -> BoatResponse.UnknownBoat
+                    | false -> BoatResponse.Error UnknownBoat
                     | true -> BoatResponse.Boat aSimpleBoat
         | _ -> boatResponse
 
@@ -45,7 +54,7 @@ let checkBoatAllreadyExists boatResponse =
                                                         | b when  b = aSimpleBoat.Name -> true
                                                         | _ -> false ) 
                 match result with
-                    | true -> BoatResponse.BoatTypeAlreadyPlaced
+                    | true -> BoatResponse.Error BoatTypeAlreadyPlaced
                     | false -> BoatResponse.Boat aSimpleBoat
         | _ -> boatResponse
 let checkBoatAllreadyExistsforPut boatResponse = 
@@ -56,7 +65,7 @@ let checkBoatAllreadyExistsforPut boatResponse =
                                                         | _ -> false ) 
                 match result with
                     | true -> BoatResponse.Boat aSimpleBoat
-                    | false -> BoatResponse.BoatHasNotAlreadyBeenPlaced
+                    | false -> BoatResponse.Error BoatHasNotAlreadyBeenPlaced
         | _ -> boatResponse
 
 let getEndCoordinates (coor:BatailleNavale.db.boats.Coordinate) (boatSize:int) (isVertical:bool) = 
@@ -72,24 +81,24 @@ let checkCoordinatesAreInsideGrid boatResponse =
     match boatResponse with
         | Boat aSimpleBoat  ->
                 match aSimpleBoat.TopLeftCoordinate.X with
-                    | b when b > 99 -> BoatResponse.OutOfGrid
+                    | b when b > 99 -> BoatResponse.Error OutOfGrid
                     | _ -> 
                         match aSimpleBoat.TopLeftCoordinate.Y with
-                            | c when c > 99 -> BoatResponse.OutOfGrid
+                            | c when c > 99 -> BoatResponse.Error OutOfGrid
                             | _ -> 
                                 let size = List.tryFind( fun a -> match a with
                                                         | (b,c) when  b = aSimpleBoat.Name -> true
                                                         | _ -> false ) boatTypes
                                 match size with
-                                    | None -> BoatResponse.UnknownBoat
+                                    | None -> BoatResponse.Error UnknownBoat
                                     | Option.Some value ->
                                                 let (n:string, s:int) = value
                                                 let endCoor = getEndCoordinates aSimpleBoat.TopLeftCoordinate s aSimpleBoat.IsVertical
                                                 match endCoor.X with
-                                                    | c when c > 99 -> BoatResponse.OutOfGrid
+                                                    | c when c > 99 -> BoatResponse.Error OutOfGrid
                                                     | _ -> 
                                                         match endCoor.Y with
-                                                            | c when c > 99 -> BoatResponse.OutOfGrid
+                                                            | c when c > 99 -> BoatResponse.Error OutOfGrid
                                                             | _ -> boatResponse
         | _ -> boatResponse
 
@@ -125,11 +134,11 @@ let checkGridContent boatResponse =
                                                         | (b,c) when  b = aSimpleBoat.Name -> true
                                                         | _ -> false ) boatTypes
                                 match size with
-                                    | None -> BoatResponse.UnknownBoat
+                                    | None -> BoatResponse.Error UnknownBoat
                                     | Option.Some value ->
                                                 let (n:string, s:int) = value
                                                 match coordinatesHasOverlap aSimpleBoat.TopLeftCoordinate s aSimpleBoat.IsVertical with
-                                                    | true -> BoatResponse.AllreadyTaken
+                                                    | true -> BoatResponse.Error AllreadyTaken
                                                     | false -> boatResponse
         | _ -> boatResponse
 let checkGridContentForPut boatResponse =
@@ -139,11 +148,11 @@ let checkGridContentForPut boatResponse =
                                                         | (b,c) when  b = aSimpleBoat.Name -> true
                                                         | _ -> false ) boatTypes
                                 match size with
-                                    | None -> BoatResponse.UnknownBoat
+                                    | None -> BoatResponse.Error UnknownBoat
                                     | Option.Some value ->
                                                 let (n:string, s:int) = value
                                                 match coordinatesHasOverlap aSimpleBoat.TopLeftCoordinate s aSimpleBoat.IsVertical with
-                                                    | true -> BoatResponse.AllreadyTaken
+                                                    | true -> BoatResponse.Error AllreadyTaken
                                                     | false -> boatResponse
         | _ -> boatResponse
 
