@@ -55,3 +55,8 @@ module DbUsers =
     // User exists
     let isUserExists =
         userStorage.ContainsKey
+
+    // Add some users
+    createUser { Id = 0;Username = "Paul" }
+    createUser { Id = 0;Username = "Louis" }
+    createUser { Id = 0;Username = "Marie" }

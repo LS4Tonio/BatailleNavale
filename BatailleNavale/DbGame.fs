@@ -1,7 +1,6 @@
 ﻿namespace BatailleNavale.db.games
 
 open System.Collections.Generic
-open BatailleNavale.db.users
 
 type GameState =
     | WaitingForPlayer = 0
@@ -31,19 +30,10 @@ type Grid = {
     Cells: List<Cell>
 }
 
-type Player = {
-    User: User
-    //Grid: Grid
-}
-
-type PlayerOrNone =
-    | Empty
-    | Player of Player
-
 type Game = {
     Id: int
     Player1: int
-    Player2: PlayerOrNone
+    Player2: int
     State: GameState
     Current: int
     Winner: int
@@ -60,42 +50,19 @@ module DbGames =
 
     // Get game
     let getById id =
-        //match id with
-        //| 0 ->
-        //    Some {
-        //        Id = id
-        //        Player1 = 0
-        //        Player2 = PlayerOrNone.Empty
-        //        State = GameState.WaitingForPlayer
-        //        Current = -1
-        //        Winner = -1
-        //    }
-        //| _ ->
-            match gameStorage.ContainsKey(id) with
-            | true -> Some gameStorage.[id]
-            | false -> None
+        match gameStorage.ContainsKey(id) with
+        | true -> Some gameStorage.[id]
+        | false -> None
 
     // Join game
     let joinGame gameId playerId =
         match gameStorage.ContainsKey(gameId) with
         | true ->
             let currentGame = gameStorage.[gameId]
-            //let user = {
-            //    Grid = {
-            //        LengthX = 10
-            //        LengthY = 10
-            //        Cells = new List<Cell>()
-            //    }
-            //    User = {
-            //        Id = playerId
-            //        Username = ""
-            //    }
-            //}
             Some {
                 Id = currentGame.Id
                 Player1 = currentGame.Player1
                 Player2 = currentGame.Player2
-                //Player2 = PlayerOrNone.Player user
                 State = GameState.Preparation
                 Current = currentGame.Current
                 Winner = currentGame.Winner
@@ -109,7 +76,6 @@ module DbGames =
             Id = id
             Player1 = game.Player1
             Player2 = game.Player2
-            //Player2 = PlayerOrNone.Empty
             State = GameState.WaitingForPlayer
             Current = -1
             Winner = -1
