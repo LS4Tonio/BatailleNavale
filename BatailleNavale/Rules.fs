@@ -1,5 +1,251 @@
 ﻿module Rules
+
+open System.Collections.Generic
+
+let  defaultBoats = ["carrier"; "battleship"; "cruiser"; "submarine"; "destroyer"]
+let boatTypes = [("carrier", 5); ("battleship",4); ("cruiser",3); ("submarine",3); ("destroyer",2)]
+
+type SimpleBoat = {
+     Name: string
+     TopLeftCoordinate: BatailleNavale.db.boats.Coordinate
+     IsVertical: bool
+}
+
+
+type MayHaveBoat = 
+    | Boat of SimpleBoat
+    | Empty
+
+type GridElement = {
+     Boat: MayHaveBoat
+     Hit : bool
+}
+type BoatResponseError = //moved to errors
+    | OutOfGrid
+    | AllreadyTaken
+    | BoatTypeAlreadyPlaced
+    | UnknownBoat
+    | BoatHasNotAlreadyBeenPlaced //for update
+
+//type OptionLike<'a> =       // use a generic definition
+//   | Some of 'a           // valid value
+//   | Error of BoatResponseError                 // missing
+
+type BoatResponse = 
+    | Boat of SimpleBoat
+    | Error of BoatResponseError
+
+let private Boats = new List<SimpleBoat>()
+let private BoatGrid = List<List<GridElement>>()
+
+let checkBoatType boatResponse = 
+    match boatResponse with
+        | Boat aSimpleBoat  ->
+                let result = List.contains(aSimpleBoat.Name ) defaultBoats
+                match result with
+                    | false -> BoatResponse.Error UnknownBoat
+                    | true -> BoatResponse.Boat aSimpleBoat
+        | _ -> boatResponse
+
+let checkBoatAllreadyExists boatResponse = 
+    match boatResponse with
+        | Boat aSimpleBoat  ->
+                let result = Boats.Exists(  fun a -> match a.Name with
+                                                        | b when  b = aSimpleBoat.Name -> true
+                                                        | _ -> false ) 
+                match result with
+                    | true -> BoatResponse.Error BoatTypeAlreadyPlaced
+                    | false -> BoatResponse.Boat aSimpleBoat
+        | _ -> boatResponse
+let checkBoatAllreadyExistsforPut boatResponse = 
+    match boatResponse with
+        | Boat aSimpleBoat  ->
+                let result = Boats.Exists(  fun a -> match a.Name with
+                                                        | b when  b = aSimpleBoat.Name -> true
+                                                        | _ -> false ) 
+                match result with
+                    | true -> BoatResponse.Boat aSimpleBoat
+                    | false -> BoatResponse.Error BoatHasNotAlreadyBeenPlaced
+        | _ -> boatResponse
+
+let getEndCoordinates (coor:BatailleNavale.db.boats.Coordinate) (boatSize:int) (isVertical:bool) = 
+                    match isVertical with
+                        | true ->  let nco =  coor.Y + boatSize
+                                   let truc =  { BatailleNavale.db.boats.Coordinate.X = coor.X;  BatailleNavale.db.boats.Coordinate.Y = nco }
+                                   truc
+                        | false -> let nco = coor.X + boatSize
+                                   let truc =  { BatailleNavale.db.boats.Coordinate.X = nco;  BatailleNavale.db.boats.Coordinate.Y = coor.Y }
+                                   truc
+
+let checkCoordinatesAreInsideGrid boatResponse = 
+    match boatResponse with
+        | Boat aSimpleBoat  ->
+                match aSimpleBoat.TopLeftCoordinate.X with
+                    | b when b > 99 -> BoatResponse.Error OutOfGrid
+                    | _ -> 
+                        match aSimpleBoat.TopLeftCoordinate.Y with
+                            | c when c > 99 -> BoatResponse.Error OutOfGrid
+                            | _ -> 
+                                let size = List.tryFind( fun a -> match a with
+                                                        | (b,c) when  b = aSimpleBoat.Name -> true
+                                                        | _ -> false ) boatTypes
+                                match size with
+                                    | None -> BoatResponse.Error UnknownBoat
+                                    | Option.Some value ->
+                                                let (n:string, s:int) = value
+                                                let endCoor = getEndCoordinates aSimpleBoat.TopLeftCoordinate s aSimpleBoat.IsVertical
+                                                match endCoor.X with
+                                                    | c when c > 99 -> BoatResponse.Error OutOfGrid
+                                                    | _ -> 
+                                                        match endCoor.Y with
+                                                            | c when c > 99 -> BoatResponse.Error OutOfGrid
+                                                            | _ -> boatResponse
+        | _ -> boatResponse
+
+let coordinateInGridHasBoat (x,y) = 
+        let innerList =  BoatGrid.[x]
+        let element = innerList.[y]
+        match element.Boat with
+            | MayHaveBoat.Boat aBoat -> true
+            | Empty -> false
+let coordinateInGridHasBoatForPut (x,y) (boat:SimpleBoat) = 
+        let innerList =  BoatGrid.[x]
+        let element = innerList.[y]
+        match element.Boat with
+            | MayHaveBoat.Boat aBoat -> 
+                            match aBoat.Name with
+                                | c when c = boat.Name -> false
+                                | _ -> true
+            | Empty -> false
+   
+let coordinatesHasOverlapForPut (coor:BatailleNavale.db.boats.Coordinate) (boatSize:int) (isVertical:bool) (boat:SimpleBoat) =
+                    match isVertical with
+                        | true -> [coor.Y .. coor.Y+ boatSize] |> List.map( fun a ->coordinateInGridHasBoatForPut(coor.X, a) boat ) |> List.exists( fun a -> a) 
+                        | false -> [coor.X .. coor.X+ boatSize] |> List.map( fun a ->coordinateInGridHasBoatForPut(a, coor.Y) boat) |> List.exists( fun a -> a) 
+let coordinatesHasOverlap (coor:BatailleNavale.db.boats.Coordinate) (boatSize:int) (isVertical:bool) =
+                    match isVertical with
+                        | true -> [coor.Y .. coor.Y+ boatSize] |> List.map( fun a ->coordinateInGridHasBoat(coor.X, a) ) |> List.exists( fun a -> a) 
+                        | false -> [coor.X .. coor.X+ boatSize] |> List.map( fun a ->coordinateInGridHasBoat(a, coor.Y) ) |> List.exists( fun a -> a) 
+
+let checkGridContent boatResponse =
+    match boatResponse with
+        | Boat aSimpleBoat  ->
+                                let size = List.tryFind( fun a -> match a with
+                                                        | (b,c) when  b = aSimpleBoat.Name -> true
+                                                        | _ -> false ) boatTypes
+                                match size with
+                                    | None -> BoatResponse.Error UnknownBoat
+                                    | Option.Some value ->
+                                                let (n:string, s:int) = value
+                                                match coordinatesHasOverlap aSimpleBoat.TopLeftCoordinate s aSimpleBoat.IsVertical with
+                                                    | true -> BoatResponse.Error AllreadyTaken
+                                                    | false -> boatResponse
+        | _ -> boatResponse
+let checkGridContentForPut boatResponse =
+    match boatResponse with
+        | Boat aSimpleBoat  ->
+                                let size = List.tryFind( fun a -> match a with
+                                                        | (b,c) when  b = aSimpleBoat.Name -> true
+                                                        | _ -> false ) boatTypes
+                                match size with
+                                    | None -> BoatResponse.Error UnknownBoat
+                                    | Option.Some value ->
+                                                let (n:string, s:int) = value
+                                                match coordinatesHasOverlap aSimpleBoat.TopLeftCoordinate s aSimpleBoat.IsVertical with
+                                                    | true -> BoatResponse.Error AllreadyTaken
+                                                    | false -> boatResponse
+        | _ -> boatResponse
+
+let placeBoatInGrid (boat:SimpleBoat) = //is this right????
+    let (name:string, size:int) = List.find( fun a -> match a with
+                                                        | (b,c) when  b = boat.Name -> true
+                                                        | _ -> false ) boatTypes
+    let ab:MayHaveBoat = MayHaveBoat.Boat boat
+    match boat.IsVertical with
+                        | true -> [boat.TopLeftCoordinate.Y .. boat.TopLeftCoordinate.Y+ size] |> List.map( fun a -> BoatGrid.[boat.TopLeftCoordinate.X].[a] <- {
+                                                                                                                                                    GridElement.Boat =  ab
+                                                                                                                                                    GridElement.Hit = false
+                                                                                                                                                    }
+                                                                                                                     boat
+                                                                                                            ) 
+                        | false -> [boat.TopLeftCoordinate.X .. boat.TopLeftCoordinate.X+ size] |> List.map( fun a -> BoatGrid.[a].[boat.TopLeftCoordinate.Y] <- {
+                                                                                                                                                    GridElement.Boat =  ab
+                                                                                                                                                    GridElement.Hit = false
+                                                                                                                                                    }
+                                                                                                                      boat
+                                                                                                            )
+let removeBoatFromGrid (oldBoat:SimpleBoat) = //is this right????
+    let (name:string, size:int) = List.find( fun a -> match a with
+                                                        | (b,c) when  b = oldBoat.Name -> true
+                                                        | _ -> false ) boatTypes
+    let ab:MayHaveBoat = MayHaveBoat.Empty
+    match oldBoat.IsVertical with
+                        | true -> [oldBoat.TopLeftCoordinate.Y .. oldBoat.TopLeftCoordinate.Y+ size] |> List.map( fun a -> BoatGrid.[oldBoat.TopLeftCoordinate.X].[a] <- {
+                                                                                                                                                    GridElement.Boat =  ab
+                                                                                                                                                    GridElement.Hit = false
+                                                                                                                                                    }
+                                                                                                                           oldBoat)
+                                   
+                                                                                                            
+                        | false -> [oldBoat.TopLeftCoordinate.X .. oldBoat.TopLeftCoordinate.X+ size] |> List.map( fun a -> BoatGrid.[a].[oldBoat.TopLeftCoordinate.Y] <- {
+                                                                                                                                                    GridElement.Boat =  ab
+                                                                                                                                                    GridElement.Hit = false
+                                                                                                                                                    }
+                                                                                                                            oldBoat)
+                                    
+
+    // Update game by id
+    //todo : checks again! (different overlap check, because overlapping with itself wont be a pbm), check we already have it in list!
+let updateBoat aSimpleBoat =
+    let response =  aSimpleBoat |> checkBoatType |> checkCoordinatesAreInsideGrid |> checkBoatAllreadyExistsforPut |> checkGridContentForPut
+    match response with
+        | Boat aSimpleBoat ->
+                                let oldBoat:SimpleBoat=  Boats.Find(fun a -> match a.Name with
+                                                                                | c when c = aSimpleBoat.Name -> true
+                                                                                | _ -> false)
+                                oldBoat |> removeBoatFromGrid
+                                Boats.RemoveAll(fun a -> match a.Name with
+                                                                                | c when c = aSimpleBoat.Name -> true
+                                                                                | _ -> false)
+                                Boats.Add(aSimpleBoat)
+                                placeBoatInGrid aSimpleBoat
+                                response
+        | _ -> response                                           
+
+// PlaceBoat
+//check coordinates are in grid.
+//check not where another boat is
+//check boat type/number!
+//add boat to boat list, add boat to boatgrid
+let placeBoat aSimpleBoat =
+    let response =  aSimpleBoat |> checkBoatType |> checkCoordinatesAreInsideGrid |> checkBoatAllreadyExists |> checkGridContent
+    match response with
+        | Boat aSimpleBoat ->
+                Boats.Add(aSimpleBoat)
+                placeBoatInGrid aSimpleBoat
+                response
+        | _ -> response
+    response
+    
+let getAll () =
+    Boats |> Seq.map (fun m -> m)
+
+//==========================================================
+
 //list7 & resultList2 is the proper example
+
+
+type Untruc = int
+
+type Deuxtruc =
+    | UnInt of Untruc
+    | Empty
+
+let returndeuxtruc p =
+    match p with
+    | a when a<10 -> Deuxtruc.UnInt p
+    | _ -> Deuxtruc.Empty
+
 
 
 let aggregateString s1 s2 = 
@@ -43,5 +289,6 @@ let printsomething s1 =
         | _ -> a ) 
 
     printfn "The resultList2: %A" resultList2
-
+    
     printfn "%s" (["a";"ab";"abc";"abcd"] |> List.reduce aggregateString)
+

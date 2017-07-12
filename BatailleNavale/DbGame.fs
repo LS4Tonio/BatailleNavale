@@ -80,8 +80,8 @@ module DbGames =
             Current = -1
             Winner = -1
         }
-        gameStorage.Add(id, newGame)
-        newGame
+        gameStorage.Add(id, newGame)//todo : get error!
+        Errors.OptionLike.Some  newGame
 
     // Update game by id
     let updateGameById gameId gameToBeUpdated =
@@ -96,8 +96,8 @@ module DbGames =
                 Winner = gameToBeUpdated.Winner
             }
             gameStorage.[gameId] <- updatedGame
-            Some updatedGame
-        | false -> None
+            Errors.OptionLike.Some updatedGame
+        | false -> Errors.OptionLike.Error Errors.Errors.UnknownGame
 
     // Update game
     let updateGame gameToBeUpdated =
