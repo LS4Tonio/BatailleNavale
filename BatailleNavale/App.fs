@@ -7,9 +7,22 @@ open BatailleNavale.db.users
 open BatailleNavale.db.games
 open Rules
 open Suave.Successful
+open Suave.RequestErrors
+open Suave.Filters
+open Suave.Operators
+open System.IO
 
 [<EntryPoint>]
 let main argv =
+    let indexWebPart = choose [
+        GET >=> path "/" >=> Files.file "index.html"
+        GET >=> Files.browseHome
+        RequestErrors.NOT_FOUND "Page not found"
+    ]
+    let config = {
+        defaultConfig with homeFolder = Some (Path.GetFullPath "./")
+    }
+
     let userWebPart = rest "users" {
         GetAll = DbUsers.getUsers
         Create = DbUsers.createUser
@@ -29,10 +42,10 @@ let main argv =
         IsExists = DbGames.isGameExists
     }
 
-    let defaultWebPart = OK "Hello World"
+    //let defaultWebPart = OK "Hello World"
 
     //printsomething 1
 
-    startWebServer defaultConfig (choose [userWebPart; gameWebPart; defaultWebPart])
+    startWebServer config (choose [userWebPart; gameWebPart; indexWebPart])
     //main must end with int
     0

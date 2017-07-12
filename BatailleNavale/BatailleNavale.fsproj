@@ -62,7 +62,9 @@
     <Compile Include="Rules.fs" />
     <Compile Include="RestFul.fs" />
     <Compile Include="App.fs" />
-    <None Include="Index.html" />
+    <None Include="Index.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">
