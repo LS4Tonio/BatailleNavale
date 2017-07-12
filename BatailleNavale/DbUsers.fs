@@ -30,7 +30,7 @@ module DbUsers =
             Username = user.Username
         }
         userStorage.Add(id, newUser)
-        newUser
+        Errors.OptionLike.Some newUser
 
     // Update user by id
     let updateUserById userId userToBeUpdated =
@@ -41,12 +41,12 @@ module DbUsers =
                 Username = userToBeUpdated.Username
             }
             userStorage.[userId] <- updatedUser
-            Some updatedUser
-        | false -> None
+            Errors.OptionLike.Some updatedUser
+        | false -> Errors.OptionLike.Error Errors.UnknownUser
 
     // Update user
     let updateUser userToBeUpdated =
-        updateUserById userToBeUpdated.Id userToBeUpdated
+         updateUserById userToBeUpdated.Id userToBeUpdated 
 
     // Delete user
     let deleteUser userId =
@@ -55,3 +55,8 @@ module DbUsers =
     // User exists
     let isUserExists =
         userStorage.ContainsKey
+
+    // Add some users
+    createUser { Id = 0;Username = "Paul" }
+    createUser { Id = 0;Username = "Louis" }
+    createUser { Id = 0;Username = "Marie" }
