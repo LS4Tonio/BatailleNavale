@@ -62,6 +62,7 @@
     <Compile Include="Rules.fs" />
     <Compile Include="RestFul.fs" />
     <Compile Include="App.fs" />
+    <None Include="Index.html" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.Core">
