@@ -63,7 +63,7 @@ let main argv =
         IsExists = DbGames.isGameExists
     }
     
-    let boatWebPart = rest "defaultstartboats" {
+    let boatWebPart2 = rest "defaultstartboats" {
         GetAll = DbBoats.getdefaultboatlistinformation
         Create = notImpemented2
         Update = notImpemented2
@@ -72,7 +72,8 @@ let main argv =
         UpdateById = notImpemented3 //todo
         IsExists = DbGames.isGameExists
     }
-    startWebServer config (choose [userWebPart; gameWebPart; boatWebPart; boatWebPart; indexWebPart])
+
+    startWebServer config (choose [userWebPart; gameWebPart; boatWebPart; boatWebPart2; indexWebPart])
 
     //main must end with int
     0

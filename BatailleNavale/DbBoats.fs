@@ -29,9 +29,20 @@ type BoatResponseError =
 
 module DbBoats =
     open System.Collections.Generic
+    
+    let gridSize =
+     (100,  100)
 
     let private Boats = new List<SimpleBoat>()
-    let private BoatGrid = List<List<GridElement>>()
+    let mutable BoatGrid = 
+            let ( sizex, sizey) = gridSize
+            List.init sizex (fun index -> List.init sizey ( fun index2 -> {GridElement.Boat = MayHaveBoat.Empty; GridElement.Hit = false}))
+
+    
+    //let private BoatGrid = new List<List<GridElement>>()
+//    let dbInit =    
+//        let ( sizex, sizey) = gridSize
+//        BoatGrid <- List.init sizex (fun index -> List.init sizey ( fun index2 -> something index index2))
     let private defaultBoats = [
         "carrier"
         "battleship"
@@ -49,6 +60,7 @@ module DbBoats =
 
     let getdefaultboatlistinformation a =
         seq boatTypes
+
 
 
     // Get last coordinates of the boat
@@ -99,13 +111,14 @@ module DbBoats =
 
     // Check coordinates
     let checkCoordinatesAreInsideGrid boatResponse =
+        let (sizex, sizey) = gridSize
         match boatResponse with
         | Errors.OptionLike.Some aSimpleBoat ->
             match aSimpleBoat.TopLeftCoordinate.X with
-            | b when b > 99 -> Errors.Error Errors.BoatOutOfGrid
+            | b when b >= sizex -> Errors.Error Errors.BoatOutOfGrid
             | _ ->
                 match aSimpleBoat.TopLeftCoordinate.Y with
-                | c when c > 99 -> Errors.Error Errors.BoatOutOfGrid
+                | c when c >= sizey -> Errors.Error Errors.BoatOutOfGrid
                 | _ ->
                     let size = List.tryFind(fun a ->
                         match a with
@@ -117,10 +130,10 @@ module DbBoats =
                         let (n:string, s:int) = value
                         let endCoor = getEndCoordinates aSimpleBoat.TopLeftCoordinate s aSimpleBoat.IsVertical
                         match endCoor.X with
-                        | c when c > 99 -> Errors.Error Errors.BoatOutOfGrid
+                        | c when c >= sizex -> Errors.Error Errors.BoatOutOfGrid
                         | _ ->
                             match endCoor.Y with
-                            | c when c > 99 -> Errors.Error Errors.BoatOutOfGrid
+                            | c when c >= sizey -> Errors.Error Errors.BoatOutOfGrid
                             | _ -> boatResponse
         | _ -> boatResponse
 
@@ -174,19 +187,41 @@ module DbBoats =
             | true ->
                 [boat.TopLeftCoordinate.Y .. boat.TopLeftCoordinate.Y+ size]
                 |> List.map(fun a ->
-                    BoatGrid.[boat.TopLeftCoordinate.X].[a] <- {
-                        GridElement.Boat =  ab
-                        GridElement.Hit = false
-                    }
-                    boat)
+//                    BoatGrid.[boat.TopLeftCoordinate.X].[a] <- {
+//                        GridElement.Boat =  ab
+//                        GridElement.Hit = false
+//                    }
+                             let newGrid = List.mapi(fun i d -> 
+                                    match i with 
+                                    | index1 when index1 = boat.TopLeftCoordinate.X -> d |> List.mapi(fun i2 b -> 
+                                        match i2 with  
+                                                | index2 when index2 = a -> {
+                                                                                GridElement.Boat =  ab
+                                                                                GridElement.Hit = false
+                                                                            }
+                                                | _ -> b)
+                                    | _ -> d ) BoatGrid
+                             BoatGrid <- newGrid
+                             boat)
                 | false ->
                     [boat.TopLeftCoordinate.X .. boat.TopLeftCoordinate.X+ size]
                     |> List.map( fun a ->
-                        BoatGrid.[a].[boat.TopLeftCoordinate.Y] <- {
-                            GridElement.Boat =  ab
-                            GridElement.Hit = false
-                        }
-                        boat)
+//                        BoatGrid.[a].[boat.TopLeftCoordinate.Y] <- {
+//                            GridElement.Boat =  ab
+//                            GridElement.Hit = false
+//                        }
+                             let newGrid = List.mapi(fun i d -> 
+                                    match i with 
+                                    | index1 when index1 = a -> d |> List.mapi(fun i2 b -> 
+                                        match i2 with  
+                                                | index2 when index2 = boat.TopLeftCoordinate.Y -> {
+                                                                                                        GridElement.Boat =  ab
+                                                                                                        GridElement.Hit = false
+                                                                                                    }
+                                                | _ -> b)
+                                    | _ -> d ) BoatGrid
+                             BoatGrid <- newGrid
+                             boat)
 
     // Add boat on grid
     let placeBoat boat =
@@ -233,18 +268,41 @@ module DbBoats =
                                                             | _ -> false ) boatTypes
         let ab:MayHaveBoat = MayHaveBoat.Empty
         match oldBoat.IsVertical with
-                            | true -> [oldBoat.TopLeftCoordinate.Y .. oldBoat.TopLeftCoordinate.Y+ size] |> List.map( fun a -> BoatGrid.[oldBoat.TopLeftCoordinate.X].[a] <- {
-                                                                                                                                                        GridElement.Boat =  ab
-                                                                                                                                                        GridElement.Hit = false
-                                                                                                                                                        }
-                                                                                                                               oldBoat)
+                            | true -> [oldBoat.TopLeftCoordinate.Y .. oldBoat.TopLeftCoordinate.Y+ size] |> List.map( fun a -> 
+                                                                                        let newGrid = List.mapi(fun i d ->  match i with 
+                                                                                                                                | index1 when index1 = oldBoat.TopLeftCoordinate.X -> d |> List.mapi(fun i2 b ->  match i2 with  
+                                                                                                                                                                                                                    | index2 when index2 = a -> {
+                                                                                                                                                                                                                                                    GridElement.Boat =  ab
+                                                                                                                                                                                                                                                    GridElement.Hit = false
+                                                                                                                                                                                                                                                }
+                                                                                                                                                                                                                    | _ -> b)
+                                                                                                                                | _ -> d ) BoatGrid
+                                                                                        BoatGrid <- newGrid
+                                                                                        oldBoat)
+//                                                                                                                               BoatGrid.[oldBoat.TopLeftCoordinate.X].[a] <- {
+//                                                                                                                                                        GridElement.Boat =  ab
+//                                                                                                                                                        GridElement.Hit = false
+//                                                                                                                                                        }
+                                                                                                                        
+                            
                                    
                                                                                                             
-                            | false -> [oldBoat.TopLeftCoordinate.X .. oldBoat.TopLeftCoordinate.X+ size] |> List.map( fun a -> BoatGrid.[a].[oldBoat.TopLeftCoordinate.Y] <- {
-                                                                                                                                                        GridElement.Boat =  ab
-                                                                                                                                                        GridElement.Hit = false
-                                                                                                                                                        }
-                                                                                                                                oldBoat)
+                            | false -> [oldBoat.TopLeftCoordinate.X .. oldBoat.TopLeftCoordinate.X+ size] |> List.map( fun a -> 
+                                                                                        let newGrid = List.mapi(fun i d ->  match i with 
+                                                                                                                                | index1 when index1 = a -> d |> List.mapi(fun i2 b ->  match i2 with  
+                                                                                                                                                                                                    | index2 when index2 = oldBoat.TopLeftCoordinate.Y -> {
+                                                                                                                                                                                                                                                                GridElement.Boat =  ab
+                                                                                                                                                                                                                                                                GridElement.Hit = false
+                                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                    | _ -> b)
+                                                                                                                                | _ -> d ) BoatGrid
+                                                                                        BoatGrid <- newGrid
+                                                                                        oldBoat)
+//                                                                                                                          fun a -> BoatGrid.[a].[oldBoat.TopLeftCoordinate.Y] <- {
+//                                                                                                                                                        GridElement.Boat =  ab
+//                                                                                                                                                        GridElement.Hit = false
+//                                                                                                                                                        }
+                                                                                                                               // oldBoat)
                                     
 
         //todo : checks again! (different overlap check, because overlapping with itself wont be a pbm), check we already have it in list!
@@ -281,3 +339,5 @@ module DbBoats =
                                                                         | _ -> false)  |> ignore
                                     response
             | _ -> response     
+
+
