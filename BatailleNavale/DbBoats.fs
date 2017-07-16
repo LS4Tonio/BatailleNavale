@@ -33,16 +33,11 @@ module DbBoats =
     let gridSize =
      (100,  100)
 
-    let private Boats = new List<SimpleBoat>()
+    let Boats = new List<SimpleBoat>()
     let mutable BoatGrid = 
             let ( sizex, sizey) = gridSize
             List.init sizex (fun index -> List.init sizey ( fun index2 -> {GridElement.Boat = MayHaveBoat.Empty; GridElement.Hit = false}))
 
-    
-    //let private BoatGrid = new List<List<GridElement>>()
-//    let dbInit =    
-//        let ( sizex, sizey) = gridSize
-//        BoatGrid <- List.init sizex (fun index -> List.init sizey ( fun index2 -> something index index2))
     let private defaultBoats = [
         "carrier"
         "battleship"

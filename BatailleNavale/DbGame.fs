@@ -1,6 +1,7 @@
 ﻿namespace BatailleNavale.db.games
 
 open System.Collections.Generic
+open BatailleNavale.db.boats
 
 type GameState =
     | WaitingForPlayer = 0
@@ -38,9 +39,20 @@ type Game = {
     Current: int
     Winner: int
 }
+type PlayerBoats = {
+    aPlayerBoats: List<SimpleBoat> //DbBoats.Boats
+    aPlayerGrid: GridElement list list //DbBoats.BoatGrid
+}
+
+type GameServerOnly = {
+    GameId: int
+    PlayerOne: PlayerBoats
+    PlayerTwo: PlayerBoats
+}
 
 module DbGames =
     let private gameStorage = new Dictionary<int, Game>()
+    let private gameStorage2 = new Dictionary<int, GameServerOnly>()
 
     // Get all games waiting for player
     let getAll () =
@@ -58,15 +70,21 @@ module DbGames =
     let joinGame gameId playerId =
         match gameStorage.ContainsKey(gameId) with
         | true ->
+//            let currentGame2 = gameStorage2.[gameId] //pas nécéssaire ici vu qu'on initialise à la creation
+//            Some {
+//                GameServerOnly.GameId = currentGame2.GameId
+//                GameServerOnly.PlayerOne = {  aPlayerBoats = DbBoats.Boats; aPlayerGrid = DbBoats.BoatGrid }
+//                GameServerOnly.PlayerTwo = {  aPlayerBoats = DbBoats.Boats; aPlayerGrid = DbBoats.BoatGrid }
+//            } |> ignore
             let currentGame = gameStorage.[gameId]
             Some {
                 Id = currentGame.Id
                 Player1 = currentGame.Player1
-                Player2 = currentGame.Player2
+                Player2 = playerId
                 State = GameState.Preparation
                 Current = currentGame.Current
                 Winner = currentGame.Winner
-            }
+            } 
         | false -> None
 
     // Create game
@@ -80,11 +98,17 @@ module DbGames =
             Current = -1
             Winner = -1
         }
+        let newGame2 = {
+                GameServerOnly.GameId = id
+                GameServerOnly.PlayerOne = {  aPlayerBoats = DbBoats.Boats; aPlayerGrid = DbBoats.BoatGrid }
+                GameServerOnly.PlayerTwo = {  aPlayerBoats = DbBoats.Boats; aPlayerGrid = DbBoats.BoatGrid }
+            }
+        gameStorage2.Add(id, newGame2);
         gameStorage.Add(id, newGame)//todo : get error!
         Errors.OptionLike.Some  newGame
 
     // Update game by id
-    let updateGameById gameId gameToBeUpdated =
+    let updateGameById gameId (gameToBeUpdated:Game) =
         match gameStorage.ContainsKey(gameId) with
         | true ->
             let updatedGame = {
@@ -105,6 +129,7 @@ module DbGames =
 
     // Delete game
     let deleteGame gameId =
+        gameStorage2.Remove(gameId) |> ignore
         gameStorage.Remove(gameId) |> ignore
 
     // Game exists
