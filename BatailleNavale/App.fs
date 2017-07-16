@@ -40,13 +40,24 @@ let main argv =
         UpdateById = DbGames.updateGameById
         IsExists = DbGames.isGameExists
     }
+
+    let notImpemented3 (b:int) (a:SimpleBoat):Errors.OptionLike<SimpleBoat> = 
+         Errors.OptionLike.Error Errors.NotImplemented
+    let notImpemented4 (b:int) :Errors.OptionLike<SimpleBoat> =
+         Errors.OptionLike.Error Errors.NotImplemented
+    let notImpemented5 (b:int) = 
+         Option.None
+    let notImpemented6 (b:int) =
+         Option.None |> ignore
+
+
     let boatWebPart = rest "placeboat" {
         GetAll = DbBoats.getBoats
         Create = DbBoats.placeBoat
-        Update = Rules.getAll
-        Delete = Rules.getAll
-        GetById = DbBoats.getBoat
-        UpdateById = DbGames.updateGameById
+        Update = DbBoats.updateBoat
+        Delete = notImpemented6 //(DbBoats.deleteBoat |>  Errors.OptionLikeToOption)
+        GetById = notImpemented5 //(DbBoats.getBoat |>  Errors.OptionLikeToOption)
+        UpdateById = notImpemented3 //todo
         IsExists = DbGames.isGameExists
     }
 
