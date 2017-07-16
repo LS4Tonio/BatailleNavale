@@ -47,6 +47,10 @@ module DbBoats =
         ("destroyer",2)
     ]
 
+    let getdefaultboatlistinformation a =
+        seq boatTypes
+
+
     // Get last coordinates of the boat
     let getEndCoordinates coor boatSize isVertical =
         match isVertical with

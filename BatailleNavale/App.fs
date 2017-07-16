@@ -40,8 +40,10 @@ let main argv =
         UpdateById = DbGames.updateGameById
         IsExists = DbGames.isGameExists
     }
-
-    let notImpemented3 (b:int) (a:SimpleBoat):Errors.OptionLike<SimpleBoat> = 
+    
+    let notImpemented2 (a:'a):Errors.OptionLike<'a> = 
+         Errors.OptionLike.Error Errors.NotImplemented
+    let notImpemented3 (b:int) (a:'a):Errors.OptionLike<'a> = 
          Errors.OptionLike.Error Errors.NotImplemented
     let notImpemented4 (b:int) :Errors.OptionLike<SimpleBoat> =
          Errors.OptionLike.Error Errors.NotImplemented
@@ -57,11 +59,20 @@ let main argv =
         Update = DbBoats.updateBoat
         Delete = notImpemented6 //(DbBoats.deleteBoat |>  Errors.OptionLikeToOption)
         GetById = notImpemented5 //(DbBoats.getBoat |>  Errors.OptionLikeToOption)
+        UpdateById = notImpemented3 //
+        IsExists = DbGames.isGameExists
+    }
+    
+    let boatWebPart = rest "defaultstartboats" {
+        GetAll = DbBoats.getdefaultboatlistinformation
+        Create = notImpemented2
+        Update = notImpemented2
+        Delete = notImpemented6 //(DbBoats.deleteBoat |>  Errors.OptionLikeToOption)
+        GetById = notImpemented5 //(DbBoats.getBoat |>  Errors.OptionLikeToOption)
         UpdateById = notImpemented3 //todo
         IsExists = DbGames.isGameExists
     }
-
-    startWebServer config (choose [userWebPart; gameWebPart; indexWebPart])
+    startWebServer config (choose [userWebPart; gameWebPart; boatWebPart; boatWebPart; indexWebPart])
 
     //main must end with int
     0
