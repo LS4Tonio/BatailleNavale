@@ -9,6 +9,7 @@ module RestFul =
     open Suave.Successful
     open Suave.Filters
     open Suave.RequestErrors
+    open BatailleNavale.db.games
 
     type RestResource<'a> = {
         GetAll : unit -> 'a seq
@@ -19,6 +20,7 @@ module RestFul =
         UpdateById : int -> 'a -> 'a Errors.OptionLike
         IsExists : int -> bool
     }
+    let anything (a:'d) (b:int,c:int) :'d = a //tmp test
 
     let JSON v =
         let serializer = new JsonSerializerSettings()
@@ -75,6 +77,9 @@ module RestFul =
             | false -> NOT_FOUND ""
 
         choose [
+            GET >=> pathScan "/add/%d/%d" (fun (a,b) -> OK((a + b).ToString()))//test 
+            POST >=> pathScan "/add/%d/%d" (fun (a,b) -> OK((a + b).ToString())) >=> request (getResourceFromReq >> anything >> JSON)//et test
+            //POST >=> pathScan "/addboat/%d/%d" (fun (a,b) -> OK(a, b) >=> request (getResourceFromReq >> DbGame.placeBoat3 >> JSON)//et test nope!
             path resourcePath >=> choose [
                 GET >=> getAll
                 POST >=>

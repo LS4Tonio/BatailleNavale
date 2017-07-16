@@ -335,4 +335,89 @@ module DbBoats =
                                     response
             | _ -> response     
 
+            
+    // Check if given y, y is already taken by a boat
+    let coordinateInGridHasBoat2 (x, y) (grid: GridElement list list)  =
+        let innerList =  grid.[x]
+        let element = innerList.[y]
+        match element.Boat with
+            | MayHaveBoat.Boat aBoat -> true
+            | Empty -> false
+            
+    // Check if boat already placed
+    let checkBoatAllreadyExists2 (listBoats:List<SimpleBoat>) boatResponse  =
+        match boatResponse with
+        |  Errors.OptionLike.Some aSimpleBoat ->
+            let result = listBoats.Exists(fun a ->
+                match a.Name with
+                | b when b = aSimpleBoat.Name -> true
+                | _ -> false)
+            match result with
+            | true -> Errors.Error Errors.BoatHasNotAlreadyBeenPlaced
+            | false ->  Errors.OptionLike.Some aSimpleBoat
+        | _ -> boatResponse
 
+        
+    // Check if x,y is outside the grid
+    let coordinatesHasOverlap2 coor boatSize isVertical grid =
+        match isVertical with
+        | true ->
+            [coor.Y .. coor.Y+ boatSize]
+            |> List.map(fun a -> coordinateInGridHasBoat2(coor.X, a) grid)
+            |> List.exists( fun a -> a)
+        | false ->
+            [coor.X .. coor.X+ boatSize]
+            |> List.map(fun a -> coordinateInGridHasBoat2(a, coor.Y) grid)
+            |> List.exists( fun a -> a)
+        
+    // Check if boat is in grid
+    let checkGridContent2 grid boatResponse =
+        match boatResponse with
+        |  Errors.OptionLike.Some aSimpleBoat ->
+            let size = List.tryFind(fun a ->
+                match a with
+                | (b,c) when  b = aSimpleBoat.Name -> true
+                | _ -> false) boatTypes
+            match size with
+            | None -> Errors.Error Errors.UnknownBoat
+            | Option.Some value ->
+                let n, s = value
+                match coordinatesHasOverlap2 aSimpleBoat.TopLeftCoordinate s aSimpleBoat.IsVertical grid with
+                    | true -> Errors.Error Errors.LocationAllreadyTaken
+                    | false -> boatResponse
+        | _ -> boatResponse
+
+        
+    // Place a bont on grid
+    let placeBoatInGrid2 boat (grid: GridElement list list) : GridElement list list  =
+        let (name, size) =
+            List.find(fun a ->
+                match a with
+                | (b,c) when  b = boat.Name -> true
+                | _ -> false ) boatTypes
+        let ab = MayHaveBoat.Boat boat
+        match boat.IsVertical with
+            | true ->
+                let seq = [boat.TopLeftCoordinate.Y .. boat.TopLeftCoordinate.Y+ size]
+                List.mapi(fun i d -> 
+                        match i with 
+                        | index1 when index1 = boat.TopLeftCoordinate.X -> d |> List.mapi(fun i2 b -> 
+                            match  Seq.exists ((=)i2) seq with  
+                                    | true -> {
+                                                                    GridElement.Boat =  ab
+                                                                    GridElement.Hit = false
+                                                                }
+                                    | _ -> b)
+                        | _ -> d ) grid  
+            | false ->
+                let seq = [boat.TopLeftCoordinate.X .. boat.TopLeftCoordinate.X+ size]
+                List.mapi(fun i d -> 
+                match Seq.exists ((=)i) seq with 
+                | true -> d |> List.mapi(fun i2 b -> 
+                    match i2 with  
+                            | index2 when index2 = boat.TopLeftCoordinate.Y -> {
+                                                                                    GridElement.Boat =  ab
+                                                                                    GridElement.Hit = false
+                                                                                }
+                            | _ -> b)
+                | _ -> d ) grid

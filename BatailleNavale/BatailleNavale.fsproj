@@ -62,7 +62,6 @@
     <Compile Include="DbGame.fs" />
     <Compile Include="Rules.fs" />
     <Compile Include="RestFul.fs" />
-    <Compile Include="Rest2.fs" />
     <Compile Include="App.fs" />
     <None Include="Index.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -67,9 +67,9 @@ let main argv =
         GetAll = DbBoats.getdefaultboatlistinformation
         Create = notImpemented2
         Update = notImpemented2
-        Delete = notImpemented6 //(DbBoats.deleteBoat |>  Errors.OptionLikeToOption)
-        GetById = notImpemented5 //(DbBoats.getBoat |>  Errors.OptionLikeToOption)
-        UpdateById = notImpemented3 //todo
+        Delete = notImpemented6 
+        GetById = notImpemented5 
+        UpdateById = notImpemented3 
         IsExists = DbGames.isGameExists
     }
 

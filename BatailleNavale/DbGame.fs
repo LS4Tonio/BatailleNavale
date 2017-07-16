@@ -66,6 +66,48 @@ module DbGames =
         | true -> Some gameStorage.[id]
         | false -> None
 
+    // Add boat on grid
+    let placeBoat2 (boat:SimpleBoat) (boats: PlayerBoats) (gameid:int) (firstplayer:bool) :Errors.OptionLike<SimpleBoat> =
+        let boat2 = boat |> Errors.OptionLike.Some
+        let response:Errors.OptionLike<SimpleBoat> =
+            boat2
+            |> DbBoats.checkBoatType
+            |> DbBoats.checkCoordinatesAreInsideGrid
+            |> (DbBoats.checkBoatAllreadyExists2 boats.aPlayerBoats)
+            |> (DbBoats.checkGridContent2 boats.aPlayerGrid)
+        match response with
+        | Errors.OptionLike.Some aSimpleBoat ->
+            boats.aPlayerBoats.Add(aSimpleBoat)
+            let newGrid = DbBoats.placeBoatInGrid2 aSimpleBoat boats.aPlayerGrid
+            //todo modify 
+            let currentGame2 = gameStorage2.[gameid]
+            let playerone =  match firstplayer with
+                                | true -> { aPlayerBoats = boats.aPlayerBoats; aPlayerGrid = newGrid }
+                                | false -> { aPlayerBoats = currentGame2.PlayerOne.aPlayerBoats; aPlayerGrid =  currentGame2.PlayerOne.aPlayerGrid }
+            let playertwo =  match firstplayer with
+                                | false -> { aPlayerBoats = boats.aPlayerBoats; aPlayerGrid = newGrid }
+                                | true -> { aPlayerBoats =  currentGame2.PlayerTwo.aPlayerBoats; aPlayerGrid =  currentGame2.PlayerTwo.aPlayerGrid }
+            gameStorage2.[gameid] <-
+             {
+                GameServerOnly.GameId = currentGame2.GameId
+                GameServerOnly.PlayerOne = playerone
+                GameServerOnly.PlayerTwo = playertwo
+            }
+            response
+        | _ -> response
+
+    let  placeBoat3 (a:SimpleBoat) (gameId:int,playerId:int) :Errors.OptionLike<SimpleBoat> = //todo checks...
+            let currentGame = gameStorage.[gameId]
+            let currentGame2 = gameStorage2.[gameId] 
+            let currentplayer = match playerId with
+                                            | p when p = currentGame.Player1 -> currentGame2.PlayerOne
+                                            | p when p = currentGame.Player2 -> currentGame2.PlayerTwo//todo check for _
+            let boolfirst = match playerId with //yea a mess
+                                            | p when p = currentGame.Player1 -> true
+                                            | p when p = currentGame.Player2 -> false
+            placeBoat2 a currentplayer gameId boolfirst
+
+
     // Join game
     let joinGame gameId playerId =
         match gameStorage.ContainsKey(gameId) with
